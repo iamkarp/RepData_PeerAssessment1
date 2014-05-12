@@ -1,0 +1,110 @@
+# Reproducible Research: Peer Assessment 1
+
+
+## Loading and preprocessing the data
+
+
+
+```r
+activity = read.csv("activity.csv")
+activity2 = activity[complete.cases(activity), ]
+```
+
+
+## What is mean total number of steps taken per day?
+
+
+```r
+byday = aggregate(activity2[, 1], list(activity2[, 2]), FUN = sum)
+hist(byday[, 2], breaks = 20)
+```
+
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
+
+```r
+meanbyday = format(round(mean(byday[, 2])), scientific = FALSE)
+medianbyday = format(round(median(byday[, 2])), scientific = FALSE)
+```
+
+
+There are is an average of 10766 steps per day and a median of 10765. 
+
+## What is the average daily activity pattern?
+
+
+```r
+by5min = aggregate(activity2[, 1], list(activity2[, 3]), FUN = mean)
+plot(by5min[, 2], type = "l")
+```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
+
+```r
+maxby5min = by5min[which(by5min[, 2] == max(by5min[, 2])), 1]
+```
+
+
+The maximum average 5 minute interval is 835.   
+
+## Imputing missing values
+
+```r
+avg5min = rep(by5min[, 2], 61)
+avg5min = avg5min[1:nrow(activity)]
+activity2a = activity
+activity2a[is.na(activity2a[, 1]), 1] = avg5min[is.na(activity2a[, 1])]
+bydaya = aggregate(activity2a[, 1], list(activity2a[, 2]), FUN = sum)
+hist(bydaya[, 2], breaks = 20)
+```
+
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+
+```r
+meanbydaya = format(round(mean(bydaya[, 2])), scientific = FALSE)
+medianbydaya = format(round(median(bydaya[, 2])), scientific = FALSE)
+```
+
+
+There are is an average of 10766 steps per day and a median of 10766. This is not that different from the non imputed data.
+
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+```r
+dayofweek = weekdays(as.Date(activity[, 2]))
+activity2b = activity2a
+activity2b[, 4] = "Weekday"
+activity2b[(dayofweek %in% c("Saturday", "Sunday")), 4] = "Weekend"
+# byweekend=aggregate(activity2b[,1],list(activity2b[,4]),FUN=mean)
+activity3 = split(activity2b, activity2b[, 4])
+activity3a = data.frame(activity3[1])
+activity3b = data.frame(activity3[2])
+
+by5min2a = aggregate(activity3a[, 1], list(activity3a[, 3]), FUN = mean)
+by5min2b = aggregate(activity3b[, 1], list(activity3b[, 3]), FUN = mean)
+par(mfrow = c(2, 1))
+
+plot(by5min2a, type = "l", main = "Weekdays", xlab = "Interval")
+plot(by5min2b, type = "l", main = "Weekends", xlab = "Interval")
+```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+
+```r
+dev.off()
+```
+
+```
+## null device 
+##           1
+```
+
+```r
+
+```
+
+
+
+
